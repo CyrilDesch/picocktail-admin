@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - development
+
+env:
+  DOCKER_PROJECT_NAME_DEV: dev-picocktail-admin
+  PROJECT_PATH_DEV: ${{ secrets.DEVELOPMENT_DOCKER_IMAGES_PATH }}/dev-picocktail-admin
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/} | tr a-z A-Z)"
+        id: extract_branch
+
+      - name: Add .env variable
+        run: |
+          echo "REACT_APP_BOOKING_AFFILIATE_ID=${{ secrets.REACT_APP_BOOKING_AFFILIATE_ID }}" >> .env
+
+      # DEVELOPMENT
+      - name: Add .env variable based on branch development
+        if: ${{ steps.extract_branch.outputs.branch == 'DEVELOPMENT' }}
+        run: |
+          echo "REACT_APP_API_HOST=${{ secrets.DEVELOPMENT_REACT_APP_API_HOST }}" >> .env
+          echo "REACT_APP_HOST=${{ secrets.DEVELOPMENT_REACT_APP_HOST }}" >> .env
+
+      # DEVELOPMENT
+      - name: Copy repository contents via scp DEVELOPMENT
+        if: ${{ steps.extract_branch.outputs.branch == 'DEVELOPMENT' }}
+        uses: appleboy/scp-action@master
+        with:
+          HOST: ${{ secrets.DEVELOPMENT_HOST }}
+          USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
+          PORT: ${{ secrets.DEVELOPMENT_PORT }}
+          KEY: ${{ secrets.DEVELOPMENT_SSHKEY }}
+          source: '.'
+          target: ${{ env.PROJECT_PATH_DEV }}
+
+      - name: Executing remote command DEVELOPMENT
+        if: ${{ steps.extract_branch.outputs.branch == 'DEVELOPMENT' }}
+        uses: appleboy/ssh-action@master
+        with:
+          HOST: ${{ secrets.DEVELOPMENT_HOST }}
+          USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
+          PORT: ${{ secrets.DEVELOPMENT_PORT }}
+          KEY: ${{ secrets.DEVELOPMENT_SSHKEY }}
+          envs: PROJECT_PATH_DEV,DOCKER_PROJECT_NAME_DEV
+          script: |
+            cd $PROJECT_PATH_DEV
+            git clean -df
+            docker ps -q --filter "name=$DOCKER_PROJECT_NAME_DEV" | grep -q . && docker stop $DOCKER_PROJECT_NAME_DEV && docker container rm $DOCKER_PROJECT_NAME_DEV
+            docker build -t $DOCKER_PROJECT_NAME_DEV $PROJECT_PATH_DEV
+            docker run -d --network reverse-proxy --ip ${{ secrets.DEVELOPMENT_DOCKER_LOCAL_IP }} --name $DOCKER_PROJECT_NAME_DEV -t $DOCKER_PROJECT_NAME_DEV
