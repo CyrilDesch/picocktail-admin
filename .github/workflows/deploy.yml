@@ -21,17 +21,6 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/} | tr a-z A-Z)"
         id: extract_branch
 
-      - name: Add .env variable
-        run: |
-          echo "REACT_APP_BOOKING_AFFILIATE_ID=${{ secrets.REACT_APP_BOOKING_AFFILIATE_ID }}" >> .env
-
-      # DEVELOPMENT
-      - name: Add .env variable based on branch development
-        if: ${{ steps.extract_branch.outputs.branch == 'DEVELOPMENT' }}
-        run: |
-          echo "REACT_APP_API_HOST=${{ secrets.DEVELOPMENT_REACT_APP_API_HOST }}" >> .env
-          echo "REACT_APP_HOST=${{ secrets.DEVELOPMENT_REACT_APP_HOST }}" >> .env
-
       # DEVELOPMENT
       - name: Copy repository contents via scp DEVELOPMENT
         if: ${{ steps.extract_branch.outputs.branch == 'DEVELOPMENT' }}
