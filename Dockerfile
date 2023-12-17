@@ -8,4 +8,4 @@ RUN pip3 install -r requirements.txt
 
 EXPOSE 80
 
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=80", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "src/Accueil.py", "--server.port=80", "--server.address=0.0.0.0"]
