@@ -1,3 +1,5 @@
 streamlit
 mysqlclient
 SQLAlchemy
+matplotlib
+seaborn
