@@ -30,7 +30,7 @@ jobs:
           USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
           PORT: ${{ secrets.DEVELOPMENT_PORT }}
           KEY: ${{ secrets.DEVELOPMENT_SSHKEY }}
-          source: '.'
+          source: "."
           target: ${{ env.PROJECT_PATH_DEV }}
 
       - name: Executing remote command DEVELOPMENT
