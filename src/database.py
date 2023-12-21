@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy.sql import text
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
 
 ##############################
 ## BASIC DATABASE FUNCTIONS ##
@@ -73,15 +74,16 @@ def updateRowsAsSQL(dataframe: pd.DataFrame, originalDataframe: pd.DataFrame, ta
 # (Bad pratice but lack of time)
 def insertRowsAsSQL(dataframe: pd.DataFrame, tableName):
   errorCount = 0
+  currentDateTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
   for _, row in dataframe.iterrows():
     # Insert
-    insertQuery = f"INSERT INTO {tableName} ({", ".join([f"{col}" for col in row.index])}) VALUES ("
+    joinColumns = ", ".join([f"{col}" for col in row.index])
+    insertQuery = f"INSERT INTO {tableName} ({joinColumns}, created_at) VALUES ("
     insertQuery += ", ".join([f":{col}" for col in row.index])
-    insertQuery += ");"
-    print(insertQuery)
-    
+    insertQuery += ", :created_at);"
     params = {col: row[col] for col in row.index}
+    params['created_at'] = currentDateTime
     errorCount += 0 if executeSQL(insertQuery, params) else 1
     
   return errorCount

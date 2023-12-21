@@ -18,6 +18,7 @@ def main():
     body()
     return None
 
+@st.cache_data(ttl=60*60)
 def body():
     db = Database.get_instance().dbConnection
 
@@ -62,7 +63,7 @@ def body():
     st.markdown(f"# Détails des commandes <sub style='white-space: nowrap;'>- Total : {orders_with_names.size}</sub>", unsafe_allow_html=True)
     st.dataframe(orders_with_names[["id_x", "quantity", "recipe_id", "user_id", "created_at_x"]],
                 hide_index=True,
-                column_config={"id_x": "ID", "quantity": "Quantité", "recipe_id": "Recette", "user_id": "Utilisateur", "created_at_x": "Date de commande"})
+                column_config={"id_x": "ID", "quantity": "Quantité (ml)", "recipe_id": "Recette", "user_id": "Utilisateur", "created_at_x": "Date de commande"})
 
     st.divider()
 
@@ -82,13 +83,13 @@ def body():
     col1, col2, col3 = st.columns([8, 1, 1]) 
     with col1:
         avg_consumption_per_user_named = orders_with_names.groupby('user_id')['quantity'].mean()
-        st.title("Quantité moyenne de consommation par utilisateur :")  # Titre
+        st.title("Quantité moyenne de consommation par utilisateur, en ml :")  # Titre
         st.bar_chart(avg_consumption_per_user_named)
 
     st.divider()
 
-    # 3. Distribution des Commandes par Quantité
-    st.title("Répartition des quantités commandées :")  # Titre
+    # 3. Distribution des commandes par quantité
+    st.title("Répartition des quantités commandées, en ml :")  # Titre
     col1, col2, col3 = st.columns([8, 1, 1]) 
     with col1:
         plt.figure(figsize=(10, 6))

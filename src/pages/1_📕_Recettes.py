@@ -36,8 +36,8 @@ def body():
         key="editor",
         hide_index=True, 
         num_rows="dynamic", 
-        column_order=["name", "description", "rate_bottle_one", "rate_bottle_two", "rate_bottle_three"],
-        column_config={"name": "Nom", "description": "Description", "rate_bottle_one": "Taux bouteille 1", "rate_bottle_two": "Taux bouteille 2", "rate_bottle_three": "Taux bouteille 3"})
+        column_order=["name", "description", "rate_bottle_one", "rate_bottle_two", "rate_bottle_three", "created_at"],
+        column_config={"name": "Nom", "description": "Description", "rate_bottle_one": "Taux bouteille 1", "rate_bottle_two": "Taux bouteille 2", "rate_bottle_three": "Taux bouteille 3", "created_at": "Crée le"})
    
     # On button click
     if st.button(label="Sauvegarder", type="primary"):
@@ -46,6 +46,8 @@ def body():
 
         errorCounter = 0
         errorCounter += deleteRowsAsSQL(dataframe=recipesDf, rowsNumberList=insertedAndDeletedRows["deleted_rows"], tableName="recipes")
+        
+        insertedAndDeletedRows["deleted_rows"].sort(reverse=True)
         for row in insertedAndDeletedRows["deleted_rows"]:
             recipesDf = recipesDf.drop(recipesDf.iloc[row].name, axis=0)
         errorCounter += updateRowsAsSQL(originalDataframe=recipesDf, dataframe=editedRecipesDf, tableName="recipes")

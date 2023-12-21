@@ -18,14 +18,11 @@ def main():
 def body():
     db = Database.get_instance().dbConnection
 
-    # Initialize db connection
-    df = db.query('SELECT * from recipes;', ttl=600)
+    users_df = db.query("SELECT * FROM users;", ttl=0)
 
-    #st.dataframe(df)
+    st.title('Utilisateurs')
+    st.dataframe(users_df, column_config={"id": "ID", "cardUID": "Numéro de carte", "username": "Pseudo", "created_at": "Crée le"}, hide_index=True)
 
-    st.markdown("""
-    # COUCOU les utilisateurs
-    """)
     return None
 
 
